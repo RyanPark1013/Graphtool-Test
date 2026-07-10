@@ -1,42 +1,45 @@
 # GitHub Pages 주파수 응답 비교 페이지
 
-## 기본 축
-- X축: 20 Hz ~ 20 kHz, 로그 스케일
-- Y축: 60 dB ~ 120 dB
+## 변경 사항
+- 파일 목록을 페이지 좌측 사이드바에 표시
+- CSV 측정값과 TXT 주파수별 보정값 연동
+- 각 데이터별 보정 TXT 선택
+- 각 데이터별 보정 적용 여부 선택
+- 로그 주파수 기준으로 보정값 선형 보간
+- 기본 축: 20 Hz~20 kHz / 60~120 dB
 
-## 데이터 추가
-1. CSV를 `data` 폴더에 넣습니다.
-2. `data/files.json`의 `files` 배열에 등록합니다.
+## 보정 계산
+표시값 = 원본 dB + 보정 TXT의 해당 주파수 보정값
 
+TXT 파일에 측정 주파수가 정확히 없으면 인접한 두 보정점 사이를 로그 주파수 기준으로 선형 보간합니다.
+
+## data/files.json 예시
 ```json
 {
-  "file": "speaker.csv",
-  "name": "Speaker",
-  "calibration": -1.5,
-  "selected": true,
-  "applyCalibration": false
+  "corrections": [
+    {"file": "diffuse-field-example.txt", "name": "Diffuse Field 예제"}
+  ],
+  "files": [
+    {
+      "file": "sample-a.csv",
+      "name": "Sample A",
+      "selected": true,
+      "correctionFile": "diffuse-field-example.txt",
+      "applyCorrection": false
+    }
+  ]
 }
 ```
 
-CSV 권장 형식:
+## TXT 형식
+공백, 탭, 쉼표 구분을 지원합니다.
 
-```csv
-frequency,db
-20,82.4
-25,83.1
-20000,78.2
+```text
+frequency correction_db
+20 0.0
+1000 0.2
+10000 3.0
+20000 5.0
 ```
 
-GitHub Pages는 `data` 폴더의 파일 목록을 자동 탐색할 수 없으므로 새 파일을 넣을 때 `files.json`에도 등록해야 합니다.
-
-보정 적용 시 표시값은 `원본 dB + 보정값`입니다. 원본 CSV는 수정되지 않습니다.
-
-
-## GitHub Pages에서 깨질 때 확인
-
-- 폴더 이름은 반드시 소문자 `data`로 유지합니다.
-- `index.html`, `app.js`, `style.css`, `.nojekyll`, `data` 폴더를 같은 배포 루트에 둡니다.
-- Pages Source가 `main / (root)`이면 위 파일들이 저장소 최상위에 있어야 합니다.
-- Pages Source가 `main /docs`이면 위 파일들을 모두 `docs` 안에 넣어야 합니다.
-- 파일명 대소문자와 `data/files.json`의 `file` 값이 정확히 일치해야 합니다.
-- 변경 후 강력 새로고침(Ctrl+F5)을 합니다.
+`diffuse-field-example.txt` 값은 기능 확인용 예시이며 특정 표준, 마이크 또는 헤드폰의 공식 보정값이 아닙니다.

@@ -1,18 +1,28 @@
 {
+  "corrections": [
+    {
+      "file": "diffuse-field-example.txt",
+      "name": "Diffuse Field 예제"
+    },
+    {
+      "file": "flat-zero.txt",
+      "name": "0 dB 보정"
+    }
+  ],
   "files": [
     {
       "file": "sample-a.csv",
       "name": "Sample A",
-      "calibration": 0,
       "selected": true,
-      "applyCalibration": false
+      "correctionFile": "diffuse-field-example.txt",
+      "applyCorrection": false
     },
     {
       "file": "sample-b.csv",
       "name": "Sample B",
-      "calibration": 1.5,
       "selected": true,
-      "applyCalibration": false
+      "correctionFile": "diffuse-field-example.txt",
+      "applyCorrection": true
     }
   ]
 }

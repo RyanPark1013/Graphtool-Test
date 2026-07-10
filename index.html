@@ -2,37 +2,79 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>주파수 응답 그래프 비교</title>
+<title>주파수 응답 비교</title>
 <link rel="stylesheet" href="./style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/dist/papaparse.min.js"></script>
 </head>
 <body>
-<header><div><small>GitHub Pages · Frequency Response Viewer</small><h1>주파수 응답 비교 페이지</h1>
-<p>data 폴더에 등록한 CSV 파일을 선택해 20 Hz–20 kHz 로그 축에서 비교합니다.</p></div>
-<button id="theme">다크 모드</button></header>
-<main>
-<section>
-<div class="heading"><div><h2>데이터 선택</h2><p><code>data/files.json</code>에 등록된 파일을 표시합니다.</p></div>
-<div class="buttons"><button id="reload" class="sub">목록 새로고침</button><button id="all" class="sub">전체 선택</button><button id="none" class="sub">전체 해제</button></div></div>
-<div id="status">목록을 불러오는 중입니다.</div><div id="list" class="list"></div>
-</section>
-<section class="axis">
-<label>X 최소 (Hz)<input id="xMin" type="number" value="20"></label>
-<label>X 최대 (Hz)<input id="xMax" type="number" value="20000"></label>
-<label>Y 최소 (dB)<input id="yMin" type="number" value="60"></label>
-<label>Y 최대 (dB)<input id="yMax" type="number" value="120"></label>
-<div class="buttons wide"><button id="draw">그래프 갱신</button><button id="axisReset" class="sub">기본 축 복원</button><button id="zoomReset" class="sub">확대 초기화</button><button id="save" class="sub">PNG 저장</button></div>
-</section>
-<section class="summary"><article><span>선택 데이터</span><strong id="selected">0</strong></article><article><span>표시 데이터</span><strong id="visible">0</strong></article><article><span>주파수 범위</span><strong id="freqRange">20–20k Hz</strong></article><article><span>dB 범위</span><strong id="dbRange">60–120 dB</strong></article></section>
-<section><h2>주파수 응답 비교</h2><p>범례 클릭으로 선을 숨기고, 마우스 휠로 확대할 수 있습니다.</p><div class="chart"><canvas id="chart"></canvas></div></section>
-<section><h2>선택 데이터 정보</h2><div class="table"><table><thead><tr><th>파일</th><th>포인트</th><th>보정값</th><th>적용</th><th>범위</th></tr></thead><tbody id="tbody"></tbody></table></div></section>
-<section><h2>CSV 형식</h2><pre>frequency,db
-20,82.4
-25,83.1
-31.5,84.0
-...
-20000,78.2</pre></section>
-</main><footer>정적 GitHub Pages · 브라우저 내부 처리</footer>
-<script src="./app.js"></script></body></html>
+<header>
+  <div><small>GitHub Pages · Frequency Response Viewer</small><h1>주파수 응답 비교 페이지</h1>
+  <p>CSV 측정값과 TXT 보정값을 이용해 20 Hz–20 kHz 로그 축에서 비교합니다.</p></div>
+  <button id="theme" class="sub">다크 모드</button>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="side-head">
+      <div><h2>파일 목록</h2><p>data/files.json 기준</p></div>
+      <button id="reload" class="sub small">새로고침</button>
+    </div>
+    <div class="side-actions">
+      <button id="all" class="sub small">전체 선택</button>
+      <button id="none" class="sub small">전체 해제</button>
+    </div>
+    <div id="status">목록을 불러오는 중입니다.</div>
+    <div id="list" class="list"></div>
+  </aside>
+
+  <main>
+    <section class="axis">
+      <label>X 최소 (Hz)<input id="xMin" type="number" value="20"></label>
+      <label>X 최대 (Hz)<input id="xMax" type="number" value="20000"></label>
+      <label>Y 최소 (dB)<input id="yMin" type="number" value="60"></label>
+      <label>Y 최대 (dB)<input id="yMax" type="number" value="120"></label>
+      <div class="buttons wide">
+        <button id="draw">그래프 갱신</button>
+        <button id="axisReset" class="sub">기본 축 복원</button>
+        <button id="zoomReset" class="sub">확대 초기화</button>
+        <button id="save" class="sub">PNG 저장</button>
+      </div>
+    </section>
+
+    <section class="summary">
+      <article><span>선택 데이터</span><strong id="selected">0</strong></article>
+      <article><span>보정 적용</span><strong id="corrected">0</strong></article>
+      <article><span>주파수 범위</span><strong id="freqRange">20–20k Hz</strong></article>
+      <article><span>dB 범위</span><strong id="dbRange">60–120 dB</strong></article>
+    </section>
+
+    <section>
+      <h2>주파수 응답 비교</h2>
+      <p>보정 적용 시 각 주파수에서 TXT 보정값을 선형 보간하여 원본 dB에 더합니다.</p>
+      <div class="formula">표시값 = 원본 dB + 주파수별 TXT 보정값</div>
+      <div class="chart"><canvas id="chart"></canvas></div>
+    </section>
+
+    <section>
+      <h2>선택 데이터 정보</h2>
+      <div class="table"><table><thead><tr><th>데이터</th><th>포인트</th><th>보정 파일</th><th>적용</th><th>범위</th></tr></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+
+    <section>
+      <h2>TXT 보정 파일 형식</h2>
+      <pre>frequency correction_db
+20 0.0
+100 0.0
+1000 0.2
+5000 1.4
+10000 3.0
+20000 5.0</pre>
+      <p>쉼표, 탭 또는 공백으로 구분할 수 있습니다. 첫 줄 헤더는 있어도 되고 없어도 됩니다.</p>
+    </section>
+  </main>
+</div>
+<footer>정적 GitHub Pages · CSV/TXT 데이터는 브라우저 내부에서 처리</footer>
+<script src="./app.js"></script>
+</body></html>
