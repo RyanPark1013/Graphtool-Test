@@ -1,0 +1,18 @@
+{
+  "files": [
+    {
+      "file": "sample-a.csv",
+      "name": "Sample A",
+      "calibration": 0,
+      "selected": true,
+      "applyCalibration": false
+    },
+    {
+      "file": "sample-b.csv",
+      "name": "Sample B",
+      "calibration": 1.5,
+      "selected": true,
+      "applyCalibration": false
+    }
+  ]
+}
